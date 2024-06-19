@@ -2,12 +2,18 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_community.document_loaders import TextLoader
+from langchain_community.document_loaders import WebBaseLoader
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_community.chat_models import ChatOllama
 import time
 
-loader = TextLoader("./rag_wiki.md")
+# Text Loading Option
+# loader = TextLoader("./rag_wiki.md")
+
+# Website Loading Option
+loader = WebBaseLoader(web_paths=("https://en.wikipedia.org/wiki/Prompt_engineering",))
+
 data = loader.load()
 
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
@@ -35,8 +41,9 @@ db = FAISS.from_documents(docs, embeddings)
 print("--- Embedding Documents ---")
 print("--- %s seconds ---" % (time.time() - start_time))
 
-question = "Explain prompt engineering to me."
+question = "Explain prompt engineering."
 searchDocs = db.similarity_search(question)
+# print(searchDocs[0])
 
 # LLM
 local_llm = "llama3"
