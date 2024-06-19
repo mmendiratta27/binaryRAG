@@ -84,3 +84,10 @@ print("--- %s seconds ---" % (time.time() - start_time))
 
 print(f"\nQuestion:  {question}\n")
 print(f"{generation}\n")
+
+
+# Sources
+
+# For sentence-transformers: https://medium.com/@akriti.upadhyay/implementing-rag-with-langchain-and-hugging-face-28e3ea66c5f7
+# For Ollama: https://ollama.com/download
+# General Ref: https://github.com/langchain-ai/rag-from-scratch/blob/main/rag_from_scratch_1_to_4.ipynb
