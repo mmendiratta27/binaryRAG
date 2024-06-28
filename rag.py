@@ -11,8 +11,9 @@ import time
 # Text Loading Option
 # loader = TextLoader("./rag_wiki.md")
 
-# Website Loading Option
-loader = WebBaseLoader(web_paths=("https://en.wikipedia.org/wiki/Prompt_engineering",))
+# Using Avengers Endgame as URL
+urls = ["https://en.wikipedia.org/wiki/Avengers:_Endgame", "https://en.wikipedia.org/wiki/Avengers:_Infinity_War"]
+loader = WebBaseLoader(web_paths=urls)
 
 data = loader.load()
 
@@ -41,8 +42,7 @@ db = FAISS.from_documents(docs, embeddings)
 print("--- Embedding Documents ---")
 print("--- %s seconds ---" % (time.time() - start_time))
 
-question = "Explain prompt engineering."
-searchDocs = db.similarity_search(question)
+
 # print(searchDocs[0])
 
 # LLM
@@ -51,20 +51,19 @@ llm = ChatOllama(model=local_llm, temperature=0)
 
 # Search through database for excerpts related to question
 retriever = db.as_retriever()
-docs = retriever.invoke(question)
+# docs = retriever.invoke(question)
 
 # Create a retriever object from the 'db' with a search configuration where it retrieves up to 4 relevant splits/documents.
 retriever = db.as_retriever(search_kwargs={"k": 4})
 
 # Prompt Format for Llama3
 prompt = PromptTemplate(
-    template="""<|begin_of_text|><|start_header_id|>system<|end_header_id|> You are an assistant for question-answering tasks. 
-    Use the following pieces of retrieved context to answer the question. If you don't know the answer, just say that you don't know. 
-    Use three sentences maximum and keep the answer concise <|eot_id|><|start_header_id|>user<|end_header_id|>
-    Question: {question} 
+    template="""<|begin_of_text|><|start_header_id|>system<|end_header_id|> 
+    Use the following pieces of retrieved context to determine if the following statement is true or false. You can only respond in one word, unless you do not know the answer in which case answer: 'I don't know.' If the answer is subjective, say 'Subjective.'<|eot_id|><|start_header_id|>user<|end_header_id|>
+    Statement: {statement} 
     Context: {context} 
     Answer: <|eot_id|><|start_header_id|>assistant<|end_header_id|>""",
-    input_variables=["question", "document"],
+    input_variables=["statement", "document"],
 )
 
 llm = ChatOllama(model=local_llm, temperature=0)
@@ -72,18 +71,22 @@ llm = ChatOllama(model=local_llm, temperature=0)
 # Chain
 rag_chain = prompt | llm | StrOutputParser()
 
-# Run
-docs = retriever.invoke(question)
+file1 = open('statements.txt', 'r')
+Lines = file1.readlines()
 
-# print(docs)
-print("--- Generating Response ---")
+for statement in Lines:
+    # Run
+    docs = retriever.invoke(statement)
 
-start_time = time.time()
-generation = rag_chain.invoke({"context": docs, "question": question})
-print("--- %s seconds ---" % (time.time() - start_time))
+    # print(docs)
+    print("--- Generating Response ---")
 
-print(f"\nQuestion:  {question}\n")
-print(f"{generation}\n")
+    start_time = time.time()
+    generation = rag_chain.invoke({"context": docs, "statement": statement})
+    print("--- %s seconds ---" % (time.time() - start_time))
+
+    print(f"\nStatement:  {statement}\n")
+    print(f"{generation}\n")
 
 
 # Sources
