@@ -7,12 +7,13 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_community.chat_models import ChatOllama
 import time
+import os
 
 # Text Loading Option
 # loader = TextLoader("./rag_wiki.md")
 
 # Using Avengers Endgame as URL
-urls = ["https://en.wikipedia.org/wiki/Avengers:_Endgame", "https://en.wikipedia.org/wiki/Avengers:_Infinity_War"]
+urls = ["https://en.wikipedia.org/wiki/The_Avengers_(2012_film)", "https://en.wikipedia.org/wiki/Avengers:_Age_of_Ultron", "https://en.wikipedia.org/wiki/Avengers:_Endgame", "https://en.wikipedia.org/wiki/Avengers:_Infinity_War"]
 loader = WebBaseLoader(web_paths=urls)
 
 data = loader.load()
@@ -43,8 +44,6 @@ print("--- Embedding Documents ---")
 print("--- %s seconds ---" % (time.time() - start_time))
 
 
-# print(searchDocs[0])
-
 # LLM
 local_llm = "llama3"
 llm = ChatOllama(model=local_llm, temperature=0)
@@ -59,7 +58,7 @@ retriever = db.as_retriever(search_kwargs={"k": 4})
 # Prompt Format for Llama3
 prompt = PromptTemplate(
     template="""<|begin_of_text|><|start_header_id|>system<|end_header_id|> 
-    Use the following pieces of retrieved context to determine if the following statement is true or false. You can only respond in one word, unless you do not know the answer in which case answer: 'I don't know.' If the answer is subjective, say 'Subjective.'<|eot_id|><|start_header_id|>user<|end_header_id|>
+    Use the following pieces of retrieved context to determine if the following statement is true or false. You can only respond in one word, unless you do not know the answer in which case answer: 'I don't know.'<|eot_id|><|start_header_id|>user<|end_header_id|>
     Statement: {statement} 
     Context: {context} 
     Answer: <|eot_id|><|start_header_id|>assistant<|end_header_id|>""",
@@ -71,8 +70,18 @@ llm = ChatOllama(model=local_llm, temperature=0)
 # Chain
 rag_chain = prompt | llm | StrOutputParser()
 
-file1 = open('statements.txt', 'r')
+file1 = open('statements/statements.txt', 'r')
 Lines = file1.readlines()
+
+total_start = time.time()
+
+if os.path.exists('statements/results.txt'):
+        os.remove('statements/results.txt') #this deletes the file
+else:
+        print("The file does not exist")#add this to prevent errors
+
+
+f = open("statements/results.txt", "x")
 
 for statement in Lines:
     # Run
@@ -87,7 +96,11 @@ for statement in Lines:
 
     print(f"\nStatement:  {statement}\n")
     print(f"{generation}\n")
+    f.write(f"{generation}\n")
 
+
+
+print("--- %s Total Time in Seconds ---" % (time.time() - total_start))
 
 # Sources
 

@@ -1,0 +1,83 @@
+--- Embedding Documents ---
+--- 41.11455988883972 seconds ---
+--- Generating Response ---
+--- 0.4427528381347656 seconds ---
+
+Statement:  Robert Downey Jr. is the actor for Iron Man.
+
+
+True
+
+--- Generating Response ---
+--- 69.24208903312683 seconds ---
+
+Statement:  Thor is played by Bruce Banner.
+
+
+False
+
+--- Generating Response ---
+--- 57.774391889572144 seconds ---
+
+Statement:  Avengers Infinity War was released before Avengers Endgame.
+
+
+True
+
+--- Generating Response ---
+--- 94.38437485694885 seconds ---
+
+Statement:  All Avengers movies are rated R.
+
+
+False
+
+--- Generating Response ---
+--- 83.49215006828308 seconds ---
+
+Statement:  There are six infinity stones.
+
+
+True
+
+--- Generating Response ---
+--- 106.5884690284729 seconds ---
+
+Statement:  Dr. Strange and Wanda are members of the Avengers.
+
+
+True
+
+--- Generating Response ---
+--- 103.3436770439148 seconds ---
+
+Statement:  Thor and Batman are members of the Avengers.
+
+
+False
+
+--- Generating Response ---
+--- 69.9093849658966 seconds ---
+
+Statement:  Age of Ultron was released after Infinity War.
+
+
+False
+
+--- Generating Response ---
+--- 88.02422094345093 seconds ---
+
+Statement:  Before joining the Avengers, Natasha was a russian spy.
+
+
+True
+
+--- Generating Response ---
+--- 68.44570398330688 seconds ---
+
+Statement:  The Hulk is blue and iron man is red.
+
+False
+
+--- 741.7792041301727 Total Time in Seconds ---
+Expected and Actual Results Match!
