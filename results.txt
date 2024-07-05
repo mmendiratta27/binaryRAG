@@ -1,0 +1,30 @@
+Model phi3:mini
+-------------------
+--- Prompt #1: 1350.132434129715 seconds ---
+--- Percentage Correct: 70.0 ---
+--- Prompt #2: 1781.3616638183594 seconds ---
+--- Percentage Correct: 70.0 ---
+--- Prompt #3: 1462.5724847316742 seconds ---
+--- Percentage Correct: 65.0 ---
+--- Prompt #4: 1429.514104127884 seconds ---
+--- Percentage Correct: 75.0 ---
+--- Prompt #5: 1432.3937599658966 seconds ---
+--- Percentage Correct: 80.0 ---
+
+--- phi3:mini: 7455.9745128154755 seconds & 72.0% Correct---
+Model llama3
+-------------------
+--- Prompt #1: 1957.674135684967 seconds ---
+--- Percentage Correct: 85.0 ---
+--- Prompt #2: 2005.699611902237 seconds ---
+--- Percentage Correct: 90.0 ---
+--- Prompt #3: 1942.6227812767029 seconds ---
+--- Percentage Correct: 90.0 ---
+--- Prompt #4: 1856.6263527870178 seconds ---
+--- Percentage Correct: 40.0 ---
+--- Prompt #5: 1819.4593532085419 seconds ---
+--- Percentage Correct: 80.0 ---
+
+--- llama3: 9582.082305908203 seconds & 77.0% Correct---
+Model llama3:70b
+-------------------

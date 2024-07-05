@@ -8,11 +8,13 @@ from langchain_core.prompts import PromptTemplate
 from langchain_community.chat_models import ChatOllama
 import time
 import os
+import subprocess
 
-# Text Loading Option
-# loader = TextLoader("./rag_wiki.md")
+num_statements = 20
+num_prompts = 5
+num_models = 3
 
-# Using Avengers Endgame as URL
+# Using Avengers for URLs
 urls = ["https://en.wikipedia.org/wiki/The_Avengers_(2012_film)", "https://en.wikipedia.org/wiki/Avengers:_Age_of_Ultron", "https://en.wikipedia.org/wiki/Avengers:_Endgame", "https://en.wikipedia.org/wiki/Avengers:_Infinity_War"]
 loader = WebBaseLoader(web_paths=urls)
 
@@ -44,9 +46,6 @@ print("--- Embedding Documents ---")
 print("--- %s seconds ---" % (time.time() - start_time))
 
 
-# LLM
-local_llm = "llama3"
-llm = ChatOllama(model=local_llm, temperature=0)
 
 # Search through database for excerpts related to question
 retriever = db.as_retriever()
@@ -56,51 +55,89 @@ retriever = db.as_retriever()
 retriever = db.as_retriever(search_kwargs={"k": 4})
 
 # Prompt Format for Llama3
-prompt = PromptTemplate(
+prompt_temp = PromptTemplate(
     template="""<|begin_of_text|><|start_header_id|>system<|end_header_id|> 
-    Use the following pieces of retrieved context to determine if the following statement is true or false. You can only respond in one word, unless you do not know the answer in which case answer: 'I don't know.'<|eot_id|><|start_header_id|>user<|end_header_id|>
+    {prompt_eng}<|eot_id|><|start_header_id|>user<|end_header_id|>
     Statement: {statement} 
     Context: {context} 
     Answer: <|eot_id|><|start_header_id|>assistant<|end_header_id|>""",
     input_variables=["statement", "document"],
 )
 
-llm = ChatOllama(model=local_llm, temperature=0)
 
-# Chain
-rag_chain = prompt | llm | StrOutputParser()
+file1 = open('statements.txt', 'r')
+Statements = file1.readlines()
 
-file1 = open('statements/statements.txt', 'r')
-Lines = file1.readlines()
+file1 = open('prompts.txt', 'r')
+Prompts = file1.readlines()
 
-total_start = time.time()
+# output contains generation from LLM
+if os.path.exists('output.txt'):
+        os.remove('output.txt')
 
-if os.path.exists('statements/results.txt'):
-        os.remove('statements/results.txt') #this deletes the file
-else:
-        print("The file does not exist")#add this to prevent errors
+output = open("output.txt", "x")
+
+# results contains final output with timings and accuracy
+if os.path.exists('results.txt'):
+        os.remove('results.txt')
+
+results = open("results.txt", "x")
+
+# LLM Otions
+# llama3 (8b)
+# phi3:mini (3b)
+# llama3:70b
+
+llm_models = ["phi3:mini", "llama3", "llama3:70b"]
+
+expected = ["False", "False", "False", "False", "False", "False", "False", "False", "False", "False", "False", "True", "True", "True", "True", "True", "True", "True", "True", "True", "True"]
+counter = 0
+
+num_correct_prompt = 0
+num_correct_model = 0
+# , "llama3", "llama3:70b"
+
+for j, model in enumerate(llm_models):
+    
+    llm = ChatOllama(model=model, temperature=0)
+    # Chain
+    rag_chain = prompt_temp | llm | StrOutputParser()
+    output.write(f"Model {model}\n-------------------\n")
+    results.write(f"Model {model}\n-------------------\n")
+    total_start = time.time()
+    for i, prompt in enumerate(Prompts, start=1):
+        p_time = time.time()
+        
+        output.write(f"Prompt #{i}:\n")
 
 
-f = open("statements/results.txt", "x")
+        for statement in Statements:
+            # Run
+            docs = retriever.invoke(statement)
+            generation = rag_chain.invoke({"prompt_eng": prompt, "context": docs, "statement": statement})
+            
+            if expected[counter] in generation:
+                num_correct_prompt += 1
+                num_correct_model += 1
+            counter += 1
+            output.write(f"{generation}\n")
 
-for statement in Lines:
-    # Run
-    docs = retriever.invoke(statement)
+        print(f"--- Prompt #{i}: {(time.time() - p_time)} seconds ---")
+        results.write(f"--- Prompt #{i}: {(time.time() - p_time)} seconds ---\n")
 
-    # print(docs)
-    print("--- Generating Response ---")
+        print(f"--- Percentage Correct: {100*num_correct_prompt/num_statements} ---")
+        results.write(f"--- Percentage Correct: {100*num_correct_prompt/num_statements} ---\n")
+        
+        # reset prompt accuracy count
+        num_correct_prompt = 0
+        counter = 0
+    
+    print(f"\n--- {model}: {(time.time() - total_start)} seconds & {100*num_correct_model/(num_statements*num_prompts)}% Correct---\n")
+    results.write(f"\n--- {model}: {(time.time() - total_start)} seconds & {100*num_correct_model/(num_statements*num_prompts)}% Correct---\n")
+    
+    # reset model accuracy count
+    num_correct_model = 0
 
-    start_time = time.time()
-    generation = rag_chain.invoke({"context": docs, "statement": statement})
-    print("--- %s seconds ---" % (time.time() - start_time))
-
-    print(f"\nStatement:  {statement}\n")
-    print(f"{generation}\n")
-    f.write(f"{generation}\n")
-
-
-
-print("--- %s Total Time in Seconds ---" % (time.time() - total_start))
 
 # Sources
 

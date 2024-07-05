@@ -1,0 +1,5 @@
+Use the following pieces of retrieved context to determine if the following statement is true or false. You can only respond in one word, unless you do not know the answer in which case answer: 'I don't know.'
+Respond with true or false.
+Respond with ONLY one word. True or False.
+Please only respond with one word, true or false. Do not expand and use more than one word in any circumstance.
+Use the context to determine if the following statement is true or false. You can only respond in one word.
